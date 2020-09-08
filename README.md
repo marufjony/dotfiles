@@ -1,2 +1,3 @@
 # dotfiles
-My dotfiles for new setup just basic environment
+Basically this is the bare git repository I use for my dot configs.
+It's still in progress.
