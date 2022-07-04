@@ -3,7 +3,7 @@ import XMonad                                 -- core xmonad libraries
 import System.Directory                       -- 
 import System.IO (hClose, hPutStr, hPutStrLn)
 import System.Exit (exitSuccess)
-import qualified XMonad.StackSet as W
+import qualified XMonad.StackSet as W         -- window stack manipulation
 
     -- Actions
 import XMonad.Actions.CopyWindow (kill1)
@@ -22,7 +22,7 @@ import Data.Maybe (fromJust)
 import Data.Monoid
 import Data.Maybe (isJust)
 import Data.Tree
-import qualified Data.Map as M
+import qualified Data.Map as M              -- map creation
 
     -- Hooks
 import XMonad.Hooks.DynamicLog (dynamicLogWithPP, wrap, xmobarPP, xmobarColor, shorten, PP(..))
@@ -277,20 +277,20 @@ gsSettings =
 
 gsSystem =
   [ ("Alacritty", "alacritty")
-  , ("Bash", (myTerminal ++ " -e bash"))
-  , ("Htop", (myTerminal ++ " -e htop"))
-  , ("Fish", (myTerminal ++ " -e fish"))
+  , ("Bash", myTerminal ++ " -e bash")
+  , ("Htop", myTerminal ++ " -e htop")
+  , ("Fish", myTerminal ++ " -e fish")
   , ("PCManFM", "pcmanfm")
   , ("VirtualBox", "virtualbox")
   , ("Virt-Manager", "virt-manager")
-  , ("Zsh", (myTerminal ++ " -e zsh"))
+  , ("Zsh", myTerminal ++ " -e zsh")
   ]
 
 gsUtilities =
   [ ("Emacs", "emacs")
   , ("Emacsclient", "emacsclient -c -a 'emacs'")
   , ("Nitrogen", "nitrogen")
-  , ("Vim", (myTerminal ++ " -e vim"))
+  , ("Vim", myTerminal ++ " -e vim")
   ]
 
 myScratchPads :: [NamedScratchpad]
@@ -522,8 +522,8 @@ myKeys c = (subtitle "Custom Keys":) $ mkNamedKeymap c $
   , ("M-p t", addName "Translate text"           $ spawn "dm-translate")
 
   -- Useful programs to have a keybinding for launch
-  , ("M-<Return>", addName "Launch terminal"     $ spawn (myTerminal))
-  , ("M-b", addName "Launch web browser"         $ spawn (myBrowser))
+  , ("M-<Return>", addName "Launch terminal"     $ spawn myTerminal)
+  , ("M-b", addName "Launch web browser"         $ spawn myBrowser)
   , ("M-M1-h", addName "Launch htop"             $ spawn (myTerminal ++ " -e htop"))
 
   -- Kill windows
