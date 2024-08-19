@@ -27,12 +27,12 @@ To create symlinks for the configuration files, use GNU Stow:
 Navigate to the dotfiles directory.
 Run the following command to stow a specific application's configuration:
 
-    ```sh
+```sh
     stow <application>
 
 For example, to set up Neovim, use:
 
-    ```sh
+```sh
     stow nvim
 
 This will symlink the nvim configuration files to the appropriate location in your home directory.
