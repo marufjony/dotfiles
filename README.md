@@ -29,11 +29,12 @@ Run the following command to stow a specific application's configuration:
 
 ```sh
     stow <application>
-
+```
 For example, to set up Neovim, use:
 
 ```sh
     stow nvim
+```
 
 This will symlink the nvim configuration files to the appropriate location in your home directory.
 
