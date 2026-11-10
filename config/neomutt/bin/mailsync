@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Sync mail, index it with notmuch, and notify about new inbox mail.
+#   mailsync               sync every account
+#   mailsync marufcorp     sync one account (any mbsync channel or group)
+# Runs every 5 minutes from ~/Library/LaunchAgents/local.mailsync.plist.
+set -u
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+lock="${TMPDIR:-/tmp}/mailsync.$(id -u).lock"
+mkdir "$lock" 2>/dev/null || { echo "mailsync is already running"; exit 0; }
+trap 'rmdir "$lock"' EXIT
+
+mkdir -p "$HOME/.local/share/mail" "$HOME/.local/state/msmtp" "$HOME/.local/state/isync"
+
+# A first-ever index would report every old message as new, so stay quiet then.
+first_run=0
+[ "$(notmuch count '*' 2>/dev/null || echo 0)" = 0 ] && first_run=1
+
+if [ $# -gt 0 ]; then mbsync "$@"; else mbsync -a; fi
+rc=$?
+
+notmuch new --quiet
+
+query='tag:new and folder:/INBOX$/'
+count=$(notmuch count "$query")
+if [ "$first_run" = 0 ] && [ "$count" -gt 0 ]; then
+  body=$(notmuch search --format=json --limit=3 "$query" |
+         jq -r '.[] | "\(.authors | split("|")[0]): \(.subject)"')
+  osascript -e 'on run argv' \
+            -e 'display notification (item 2 of argv) with title (item 1 of argv) sound name "Glass"' \
+            -e 'end run' "$count new mail" "$body" >/dev/null 2>&1
+fi
+notmuch tag -new -- tag:new
+
+exit "$rc"

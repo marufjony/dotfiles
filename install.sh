@@ -27,7 +27,8 @@ fi
 
 command -v stow >/dev/null || brew install stow
 
-mkdir -p "$HOME/.config" "$HOME/.local/state"/{python,psql,mysql,node}
+mkdir -p "$HOME/.config" "$HOME/.local/state"/{python,psql,mysql,node,neomutt,msmtp,isync} \
+         "$HOME/.local/share/mail" "$HOME/.cache/neomutt"/{headers,bodies,tmp}
 
 # config/    -> ~/.config   (files linked one by one; app-written files stay out of git)
 # home/      -> ~           (only ~/.zshenv)

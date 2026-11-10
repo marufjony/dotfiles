@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Open an attachment in its macOS app. neomutt deletes its temp copy as soon
+# as this returns, so copy it somewhere the app can still read it.
+dir="${TMPDIR:-/tmp}/neomutt-open"
+mkdir -p "$dir"
+find "$dir" -type f -mtime +1 -delete 2>/dev/null
+cp "$1" "$dir/" && open "$dir/$(basename "$1")"

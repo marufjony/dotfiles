@@ -1,0 +1,63 @@
+# mbsync: copies mail from the server to ~/.local/share/mail (Maildir).
+# Run: mbsync -a   (the mailsync script does this every 5 minutes)
+# Messages over 10 MB arrive as small placeholders. Flag one (F in neomutt)
+# and the next sync downloads the full message.
+
+# Defaults for every channel (must come before the sections)
+Create Near
+Expunge Both
+SyncState *
+CopyArrivalDate yes
+
+# ---------------------------------------------------------------- marufcorp@gmail.com
+IMAPAccount marufcorp
+Host imap.gmail.com
+Port 993
+User marufcorp@gmail.com
+PassCmd "pass show Email/app/marufcorp@gmail.com | head -n1"
+TLSType IMAPS
+AuthMechs LOGIN
+CertificateFile /etc/ssl/cert.pem
+PipelineDepth 50
+
+IMAPStore marufcorp-remote
+Account marufcorp
+
+MaildirStore marufcorp-local
+Path ~/.local/share/mail/marufcorp/
+Inbox ~/.local/share/mail/marufcorp/INBOX
+SubFolders Verbatim
+MaxSize 10M
+
+Channel marufcorp-inbox
+Far :marufcorp-remote:INBOX
+Near :marufcorp-local:INBOX
+
+Channel marufcorp-sent
+Far ":marufcorp-remote:[Gmail]/Sent Mail"
+Near :marufcorp-local:Sent
+
+Channel marufcorp-drafts
+Far ":marufcorp-remote:[Gmail]/Drafts"
+Near :marufcorp-local:Drafts
+
+Channel marufcorp-trash
+Far ":marufcorp-remote:[Gmail]/Trash"
+Near :marufcorp-local:Trash
+
+Channel marufcorp-spam
+Far ":marufcorp-remote:[Gmail]/Spam"
+Near :marufcorp-local:Spam
+
+# Gmail's "All Mail" = everything, including archived mail
+Channel marufcorp-archive
+Far ":marufcorp-remote:[Gmail]/All Mail"
+Near :marufcorp-local:Archive
+
+Group marufcorp
+Channel marufcorp-inbox
+Channel marufcorp-sent
+Channel marufcorp-drafts
+Channel marufcorp-trash
+Channel marufcorp-spam
+Channel marufcorp-archive

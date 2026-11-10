@@ -1,0 +1,18 @@
+# notmuch: indexes all mail for fast search and the unified inbox.
+# The index lives in ~/.local/share/mail/.notmuch.
+[database]
+path=/Users/marufjony/.local/share/mail
+
+[user]
+name=Maruf Jony
+primary_email=marufcorp@gmail.com
+
+[new]
+tags=new;
+ignore=.mbsyncstate;.mbsyncstate.journal;.mbsyncstate.new;.mbsyncstate.lock;.uidvalidity;.isyncuidmap.db
+
+[search]
+exclude_tags=deleted;spam;
+
+[maildir]
+synchronize_flags=true

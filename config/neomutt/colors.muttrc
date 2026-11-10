@@ -1,0 +1,53 @@
+# Catppuccin Mocha
+# rosewater #f5e0dc  red #f38ba8  peach #fab387  yellow #f9e2af  green #a6e3a1
+# sky #89dceb  blue #89b4fa  lavender #b4befe  mauve #cba6f7  text #cdd6f4
+# subtext #a6adc8  overlay #6c7086  surface #313244  base default
+
+color normal          color252 default
+color error           color211 default
+color indicator       default  color237
+color tree            color141 default
+color status          color147 color236
+color search          color235 color222
+color markers         color211 default
+color prompt          color147 default
+color message         color252 default
+
+# index
+color index           color252 default ~A
+color index_author    color183 default ~A
+color index_subject   color252 default ~A
+color index_date      color243 default ~A
+color index           color117 default ~N
+color index_author    color117 default ~N
+color index_subject   color252 default ~N
+color index           color222 default ~F
+color index_author    color222 default ~F
+color index           color211 default ~D
+color index_author    color211 default ~D
+color index_subject   color211 default ~D
+color index           color243 default ~T
+
+# sidebar
+color sidebar_indicator  color235 color147
+color sidebar_highlight  color252 color237
+color sidebar_divider    color237 default
+color sidebar_new        color117 default
+color sidebar_flagged    color222 default
+color sidebar_ordinary   color250 default
+
+# message
+color hdrdefault      color243 default
+color header          color147 default "^From:"
+color header          color183 default "^Subject:"
+color header          color243 default "^(To|Cc|Date|Reply-To):"
+color quoted          color147 default
+color quoted1         color183 default
+color quoted2         color117 default
+color quoted3         color150 default
+color signature       color243 default
+color attachment      color222 default
+color body            color117 default "(https?|ftp)://[^ \t\">)]+"
+color body            color117 default "[-a-z_0-9.%$]+@[-a-z_0-9.]+\\.[-a-z][-a-z]+"
+color body            color150 default "^gpg: Good signature.*"
+color body            color211 default "^gpg: BAD signature.*"

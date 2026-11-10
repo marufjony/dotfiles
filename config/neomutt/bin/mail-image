@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Show an image attachment in the terminal, then wait for a key.
+# Real pixels in Ghostty, kitty and WezTerm (also inside tmux with
+# allow-passthrough on); block-character version anywhere else.
+clear
+if kitten icat --detect-support >/dev/null 2>&1; then
+  kitten icat --align=center --stdin=no "$1"
+else
+  chafa --size="$(tput cols)x$(( $(tput lines) - 2 ))" "$1"
+fi
+printf '\n  any key to go back'
+read -rsn1
+kitten icat --clear --stdin=no 2>/dev/null
+clear

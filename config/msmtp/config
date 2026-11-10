@@ -1,0 +1,17 @@
+# msmtp: sends mail. neomutt calls `msmtp -a <account>`.
+defaults
+auth on
+tls on
+tls_trust_file /etc/ssl/cert.pem
+logfile ~/.local/state/msmtp/msmtp.log
+
+# ---------------------------------------------------------------- marufcorp@gmail.com
+account marufcorp
+host smtp.gmail.com
+port 587
+tls_starttls on
+from marufcorp@gmail.com
+user marufcorp@gmail.com
+passwordeval "pass show Email/app/marufcorp@gmail.com | head -n1"
+
+account default : marufcorp

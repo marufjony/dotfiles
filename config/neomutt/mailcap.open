@@ -1,0 +1,2 @@
+# Used by the O key: open any attachment in its macOS app
+*/*; ~/.config/neomutt/bin/mail-open %s
