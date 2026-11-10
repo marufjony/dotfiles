@@ -1,42 +1,28 @@
-# Dotfiles
+# dotfiles
 
-This repository contains my personal configuration files (dotfiles) for various tools and environments. I manage these dotfiles using [GNU Stow](https://www.gnu.org/software/stow/), which simplifies the process of symlinking them to their respective locations.
+Personal macOS config, linked into place with GNU Stow.
 
-## Structure
+| Folder | Linked into | Contents |
+|---|---|---|
+| `config/` | `~/.config` | zsh, git, tmux, nvim, ghostty, wezterm, kitty, warp, herdr, starship, btop, gh, scripts |
+| `home/` | `~` | `.zshenv` only (sets `ZDOTDIR=~/.config/zsh`) |
+| `karabiner/` | `~/.config` | whole `karabiner/` folder |
 
-The dotfiles are organized by application, with each directory containing the relevant configuration files for that tool. The primary tools included are:
-
-- **Alacritty**: Configuration for the [Alacritty terminal emulator](https://github.com/alacritty/alacritty).
-- **zsh/.zshrc**: Custom settings and aliases for the [Zsh shell](https://www.zsh.org/).
-- **Neovim**: My configuration for [Neovim](https://neovim.io/), including plugin management and key mappings.
-- **WezTerm**: Configuration for the [WezTerm terminal emulator](https://wezfurlong.org/wezterm/).
-
-## Installation
-
-### Prerequisites
-
-1. Install [GNU Stow](https://www.gnu.org/software/stow/).
-2. Clone this repository to your home directory or any preferred location:
-
-    ```sh
-    git clone https://github.com/yourusername/dotfiles.git
-    cd dotfiles
-
-### Stow Setup
-To create symlinks for the configuration files, use GNU Stow:
-Navigate to the dotfiles directory.
-Run the following command to stow a specific application's configuration:
+## New Mac
 
 ```sh
-    stow <application>
-```
-For example, to set up Neovim, use:
-
-```sh
-    stow nvim
+git clone git@github.com:marufjony/dotfiles.git ~/Developer/dotfiles
+cd ~/Developer/dotfiles
+./install.sh --dry-run   # preview
+./install.sh --brew      # install Brewfile packages, then link
 ```
 
-This will symlink the nvim configuration files to the appropriate location in your home directory.
+Then: open a new terminal, press tmux prefix + `I` for plugins, run `nvm install 20 24`.
 
+## Day to day
 
-
+- Edit files in place (`~/.config/...`); they are links into this repo. Commit from here.
+- New config: copy it into `config/` at the same path, then `stow --adopt --no-folding -t ~/.config config`.
+- Update the Brewfile: `brew bundle dump --file=Brewfile --force`.
+- A gitleaks pre-commit hook blocks secrets. Secrets live in `pass` and the macOS Keychain, never here.
+- If an app replaces a link with a plain file, `git status` stops showing your edits; re-run `./install.sh`.

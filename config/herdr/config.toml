@@ -1,0 +1,49 @@
+# herdr 0.9.5 — ~/.config/herdr/config.toml
+# Keys mirror ~/.config/tmux/tmux.conf so muscle memory carries over.
+
+onboarding = false
+
+[terminal]
+new_cwd = "follow"              # new panes/tabs open in the current pane's directory
+
+[session]
+resume_agents_on_restore = true # reopen Claude Code / Codex sessions after a restart
+
+[worktrees]
+directory = "~/.local/share/herdr/worktrees"   # default ~/.herdr/worktrees would add clutter to ~
+
+[ui]
+status_indicators = "symbols"
+agent_panel_sort = "priority"   # agents that need you float to the top
+hide_tab_bar_when_single_tab = true
+prompt_new_workspace_name = true
+window_title = "{workspace}: {tab}"
+
+[ui.toast]
+delivery = "system"             # macOS Notification Center, works while you're in another app
+delay_seconds = 1
+
+[ui.sound]
+enabled = true
+
+[theme]
+name = "catppuccin"             # matches Ghostty's Catppuccin Macchiato family
+auto_switch = false
+
+[keys]
+prefix = "ctrl+s"               # not backtick: avoids clashing with tmux and typing ` in prompts
+
+# tmux parity
+reload_config    = "prefix+shift+r"          # tmux: R
+new_tab          = "prefix+ctrl+c"           # tmux: ^C new-window
+close_pane       = "prefix+c"                # tmux: c kill-pane
+swap_pane_down   = "prefix+x"                # tmux: x swap-pane -D
+previous_tab     = ["prefix+p", "prefix+shift+h"]   # tmux: H
+next_tab         = ["prefix+n", "prefix+shift+l"]   # tmux: L
+swap_pane_left   = ""                        # freed: shift+h/l now switch tabs
+swap_pane_right  = ""
+rename_tab       = "prefix+r"                # tmux: r rename-window
+resize_mode      = "prefix+m"                # moved off r
+split_vertical   = ["prefix+|", "prefix+v"]  # tmux: | side-by-side
+split_horizontal = "prefix+minus"            # tmux: -
+# h/j/k/l focus and z zoom already match tmux defaults

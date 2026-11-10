@@ -71,6 +71,12 @@ require('lazy').setup({
     build = function() vim.fn["mkdp#util#install"]() end,
   },
 
+    {
+    'MeanderingProgrammer/render-markdown.nvim',
+    opts = {},
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    },
+
   -- Distraction-free Coding
   { 'folke/zen-mode.nvim' }, -- Only writing pad
   { "folke/twilight.nvim", opts = {} }, -- Dim inactive portions of the code you're editing

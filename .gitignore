@@ -1,0 +1,12 @@
+.DS_Store
+
+# Karabiner writes these itself
+karabiner/karabiner/automatic_backups/
+
+# Never commit secrets or runtime state
+*.pat
+*.asc
+.env
+*.log
+*.sock
+hosts.yml
