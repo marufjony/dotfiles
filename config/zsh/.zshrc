@@ -66,10 +66,6 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # Created by `pipx` on 2024-06-07 16:44:06
 export PATH="$PATH:/Users/marufjony/.local/bin"
-export NNN_OPENER=nuke
-export NNN_FCOLORS='0000E6310000000000000000'
-export NNN_PLUG='p:preview-tui;f:finder;'
-export NNN_FIFO=/tmp/nnn.fifo
 export JAVA_HOME=$(brew --prefix openjdk)/libexec/openjdk.jdk/Contents/Home
 
 nerdfetch
