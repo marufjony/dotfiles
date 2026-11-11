@@ -37,6 +37,11 @@ stow $SIMULATE -v --no-folding -d "$DOTFILES" -t "$HOME/.config" config
 stow $SIMULATE -v --no-folding -d "$DOTFILES" -t "$HOME" home
 stow $SIMULATE -v              -d "$DOTFILES" -t "$HOME/.config" karabiner
 
+# aerc on macOS reads ~/Library/Preferences/aerc; point it at ~/.config/aerc
+if [ -z "$SIMULATE" ] && [ ! -e "$HOME/Library/Preferences/aerc" ]; then
+  ln -s "$HOME/.config/aerc" "$HOME/Library/Preferences/aerc"
+fi
+
 # Warp only reads ~/.warp
 if [ -z "$SIMULATE" ] && [ ! -e "$HOME/.warp" ]; then
   ln -s "$HOME/.config/.warp" "$HOME/.warp"

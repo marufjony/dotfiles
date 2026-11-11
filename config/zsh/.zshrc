@@ -111,6 +111,6 @@ aerc() {
   local list=$(( COLUMNS * 35 / 100 - 20 )) conf=${TMPDIR:-/tmp}/aerc-$UID.conf
   (( list < 30 )) && list=30
   sed "s/^message-list-split = .*/message-list-split = vertical $list/" ~/.config/aerc/aerc.conf >| $conf
-  # aerc on macOS looks in ~/Library/Preferences/aerc, so point it at ~/.config/aerc
-  command aerc -C $conf -A ~/.config/aerc/accounts.conf -B ~/.config/aerc/binds.conf "$@"
+  # ~/Library/Preferences/aerc links to ~/.config/aerc (see install.sh)
+  command aerc -C $conf "$@"
 }
