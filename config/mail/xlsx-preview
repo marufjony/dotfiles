@@ -1,0 +1,15 @@
+#!/opt/homebrew/opt/visidata/libexec/bin/python -I
+"""Print every sheet of an .xlsx as tab-separated text (first 200 rows each).
+Usage: xlsx-preview FILE   or   xlsx-preview < FILE"""
+import io
+import sys
+
+import openpyxl
+
+src = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "-" else io.BytesIO(sys.stdin.buffer.read())
+wb = openpyxl.load_workbook(src, read_only=True, data_only=True)
+for ws in wb.worksheets:
+    print(f"== {ws.title}")
+    for row in ws.iter_rows(values_only=True, max_row=200):
+        print("\t".join("" if v is None else str(v) for v in row))
+    print()

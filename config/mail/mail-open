@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Open an attachment in its default macOS app (Preview, Excel, ...).
+# The mail client deletes its temp copy as soon as this returns, so copy it
+# somewhere the app can still read it. Copies older than a day are removed.
+dir="${TMPDIR:-/tmp}/mail-open"
+mkdir -p "$dir"
+find "$dir" -type f -mtime +1 -delete 2>/dev/null
+cp "$1" "$dir/" && open "$dir/$(basename "$1")"

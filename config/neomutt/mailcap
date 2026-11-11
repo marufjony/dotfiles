@@ -1,17 +1,22 @@
-# How attachments open. For each type, the FIRST line is used when you press
-# Enter; the "copiousoutput" line is the text preview shown inside the message.
-# Y (yazi) and O (macOS app) use mailcap.yazi and mailcap.open instead.
+# How NeoMutt shows attachments.
+#   Inside a message: the "copiousoutput" lines draw a preview right in the
+#   message (PDF text, images, spreadsheets, Word, HTML).
+#   Attachment list (press v):
+#     Enter / l  open in the macOS app (Preview, Excel, ...)  -> mailcap.open
+#     t          view in the terminal (the first line for each type below)
+#     Y          open in yazi                                  -> mailcap.yazi
 
 text/html; w3m -I %{charset} -T text/html %s; needsterminal; nametemplate=%s.html
 text/html; w3m -I %{charset} -T text/html -dump -o display_link_number=1 %s; copiousoutput; nametemplate=%s.html
 
-application/pdf; yazi %s; needsterminal; nametemplate=%s.pdf
+application/pdf; pdftotext -layout %s - | less -R; needsterminal; nametemplate=%s.pdf
 application/pdf; pdftotext -layout -l 20 %s -; copiousoutput; nametemplate=%s.pdf
 
-image/*; ~/.config/neomutt/bin/mail-image %s; needsterminal
+image/*; ~/.config/mail/mail-image %s; needsterminal
+image/*; ~/.config/mail/mail-image --inline %s; copiousoutput
 
 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; vd %s; needsterminal; nametemplate=%s.xlsx
-application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; ~/.config/neomutt/bin/xlsx-preview %s; copiousoutput; nametemplate=%s.xlsx
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; ~/.config/mail/xlsx-preview %s; copiousoutput; nametemplate=%s.xlsx
 application/vnd.ms-excel; vd %s; needsterminal; nametemplate=%s.xls
 text/csv; vd %s; needsterminal; nametemplate=%s.csv
 text/csv; column -s, -t %s; copiousoutput
@@ -19,5 +24,5 @@ text/csv; column -s, -t %s; copiousoutput
 application/vnd.openxmlformats-officedocument.wordprocessingml.document; pandoc -f docx -t plain %s | less; needsterminal; nametemplate=%s.docx
 application/vnd.openxmlformats-officedocument.wordprocessingml.document; pandoc -f docx -t plain %s; copiousoutput; nametemplate=%s.docx
 
-# anything else: open in the macOS app
-*/*; ~/.config/neomutt/bin/mail-open %s
+# anything else: the macOS app
+*/*; ~/.config/mail/mail-open %s

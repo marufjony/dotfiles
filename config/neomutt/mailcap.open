@@ -1,2 +1,2 @@
-# Used by the O key: open any attachment in its macOS app
-*/*; ~/.config/neomutt/bin/mail-open %s
+# Used by Enter / l in the attachment list: open in the default macOS app
+*/*; ~/.config/mail/mail-open %s

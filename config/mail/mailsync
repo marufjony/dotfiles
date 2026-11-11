@@ -2,7 +2,8 @@
 # Sync mail, index it with notmuch, and notify about new inbox mail.
 #   mailsync               sync every account
 #   mailsync marufcorp     sync one account (any mbsync channel or group)
-# Runs every 5 minutes from ~/Library/LaunchAgents/local.mailsync.plist.
+# Runs when you open neomutt or aerc, and when you press o (neomutt)
+# or :check-mail (aerc). Passwords come from pass (see ~/.config/isyncrc).
 set -u
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 

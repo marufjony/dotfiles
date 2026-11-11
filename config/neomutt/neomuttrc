@@ -2,7 +2,7 @@
 #   accounts/   one file per email address (switch with F1, F2, ...)
 #   mailcap     how attachments open (PDF, images, xlsx, html)
 #   colors      Catppuccin Mocha
-#   bin/        mailsync and attachment helpers
+#   ~/.config/mail/   mailsync and attachment helpers (shared with aerc)
 # Mail is synced by mbsync (~/.config/isyncrc), sent by msmtp, searched by notmuch.
 
 set my_cfg = "~/.config/neomutt"
@@ -52,7 +52,7 @@ set tilde
 unset markers
 set smart_wrap
 set allow_ansi
-auto_view text/html application/pdf application/vnd.openxmlformats-officedocument.wordprocessingml.document application/vnd.openxmlformats-officedocument.spreadsheetml.sheet text/csv
+auto_view text/html application/pdf image/* application/vnd.openxmlformats-officedocument.wordprocessingml.document application/vnd.openxmlformats-officedocument.spreadsheetml.sheet text/csv
 alternative_order text/plain text/enriched text/html
 ignore *
 unignore from: to: cc: date: subject: reply-to:
@@ -113,11 +113,9 @@ bind index        zA collapse-all
 bind index,pager  R  group-reply
 bind index,pager  N  search-opposite
 bind index        D  delete-message
-bind index        U  undelete-message
+bind index        u  undelete-message
 bind index        <space> tag-entry
 bind index,pager  F  flag-message
-bind attach       l  view-mailcap
-bind attach       <return> view-mailcap
 bind editor       <Tab> complete-query
 # Tab in To:/Cc: completes from every address in your mail
 set query_command = "echo; notmuch address --deduplicate=address --output=sender --output=recipients -- %s | sed -E 's/^(.*) <(.*)>$/\\2\t\\1/'"
@@ -132,15 +130,21 @@ bind index,pager B   sidebar-toggle-visible
 # search all accounts with notmuch: \ then a query (from:alice, subject:invoice, date:1w..)
 bind index,pager \\ vfolder-from-query
 # o = sync now
-macro index o "<shell-escape>$my_cfg/bin/mailsync<enter>" "sync all mail now"
+macro index o "<shell-escape>~/.config/mail/mailsync<enter>" "sync all mail now"
+# U = list the links in this message; pick one and it opens in your default browser
+macro index,pager U "<pipe-message>urlscan --dedupe --single --run-safe 'open {}'<enter>" "open a link in the browser"
 # gi/ga/gs/gd/gt = go to inbox, archive, sent, drafts, trash; gu = all inboxes
 macro index,pager gu "<change-vfolder>★ All inboxes<enter>" "unified inbox"
 # A = archive (Gmail: removes from inbox, keeps in All Mail)
 macro index,pager A "<save-message>$my_archive<enter>" "archive"
 
-# attachments: Enter = best viewer, Y = yazi, O = macOS app, S = save to Downloads
-macro attach Y "<enter-command>set my_mc=\$mailcap_path mailcap_path=$my_cfg/mailcap.yazi<enter><view-mailcap><enter-command>set mailcap_path=\$my_mc<enter>" "open in yazi"
-macro attach O "<enter-command>set my_mc=\$mailcap_path mailcap_path=$my_cfg/mailcap.open<enter><view-mailcap><enter-command>set mailcap_path=\$my_mc<enter>" "open in macOS app"
+# attachments (press v on a message):
+#   Enter / l = open in the macOS app,  t = view in the terminal,
+#   Y = open in yazi,  S = save to Downloads
+macro attach <return> "<enter-command>set mailcap_path=$my_cfg/mailcap.open<enter><view-mailcap><enter-command>set mailcap_path=$my_cfg/mailcap<enter>" "open in macOS app"
+macro attach l "<enter-command>set mailcap_path=$my_cfg/mailcap.open<enter><view-mailcap><enter-command>set mailcap_path=$my_cfg/mailcap<enter>" "open in macOS app"
+bind  attach t view-mailcap
+macro attach Y "<enter-command>set mailcap_path=$my_cfg/mailcap.yazi<enter><view-mailcap><enter-command>set mailcap_path=$my_cfg/mailcap<enter>" "open in yazi"
 macro attach S "<save-entry><kill-line>~/Downloads/<enter>" "save to Downloads"
 
 # ------------------------------------------------------------------ accounts

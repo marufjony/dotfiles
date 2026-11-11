@@ -90,3 +90,26 @@ export PSQL_HISTORY="$XDG_STATE_HOME/psql/history"
 export MYSQL_HISTFILE="$XDG_STATE_HOME/mysql/history"
 export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
 export npm_config_cache="$HOME/.cache/npm"
+
+# Mail (neomutt / aerc). Unlock pass first so the sync never asks for the GPG
+# passphrase in the middle of the mail screen, then open the client; both
+# sync once as they start.
+_mail_unlock() {
+  local entry
+  entry=$(cd ~/.password-store && print -l Email/app/*.gpg(N) | head -1)
+  [[ -n $entry ]] && pass show "${entry%.gpg}" >/dev/null
+}
+neomutt() {
+  _mail_unlock || return
+  mkdir -p ~/.local/state/mail
+  { ~/.config/mail/mailsync >>~/.local/state/mail/mailsync.log 2>&1 } &!
+  command neomutt "$@"
+}
+aerc() {
+  _mail_unlock || return
+  # reading pane ~65% of the window: list = 35% minus the 20-column sidebar
+  local list=$(( COLUMNS * 35 / 100 - 20 )) conf=${TMPDIR:-/tmp}/aerc-$UID.conf
+  (( list < 30 )) && list=30
+  sed "s/^message-list-split = .*/message-list-split = vertical $list/" ~/.config/aerc/aerc.conf >| $conf
+  command aerc -C $conf "$@"
+}
