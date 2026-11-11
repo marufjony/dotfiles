@@ -1,0 +1,5 @@
+# Unified views across all accounts (notmuch). Sourced by each account file,
+# because "unmailboxes *" there would remove them.
+virtual-mailboxes "  All inboxes" "notmuch://?query=folder:/INBOX$/"
+virtual-mailboxes "  Unread"      "notmuch://?query=tag:unread and folder:/INBOX$/"
+virtual-mailboxes "  Flagged"     "notmuch://?query=tag:flagged"

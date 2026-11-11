@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Prints NeoMutt commands that rebuild the bottom bar and window title.
+# NeoMutt runs it (source "...|") at startup, after a sync, and every
+# $timeout seconds while idle, so size / last sync / status stay current.
+# The unread count (%u) and folder (%D) are filled in live by NeoMutt.
+#   neomutt-status "<real name>" <address> <account>
+name="$1" addr="$2" acct="$3"
+ms="$HOME/.config/mail/mail-status"
+size=$("$ms" size "$acct"); synced=$("$ms" synced "$acct"); state=$("$ms" state "$acct")
+case "$state" in
+  Connected) icon="" ;;
+  Syncing)   icon="" ;;
+  *)         icon="" ;;
+esac
+sep="  │  "
+left="  ${name}: ${addr}${sep}%D${sep} %u unread${sep} ${size}"
+right=" ${synced}${sep}${icon} ${state} "
+printf 'set status_format = "%s%%>  %s"\n' "${left}" "${right}"
+printf 'set ts_status_format = " %s: %s — %%D"\n' "${name}" "${addr}"

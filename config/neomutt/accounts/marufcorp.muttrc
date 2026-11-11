@@ -1,21 +1,26 @@
 # marufcorp@gmail.com (Gmail)
-set from      = "marufcorp@gmail.com"
-set sendmail  = "msmtp -a marufcorp"
+set from       = "marufcorp@gmail.com"
+set sendmail   = "msmtp -a marufcorp"
 set spool_file = "+marufcorp/INBOX"
-set postponed = "+marufcorp/Drafts"
-set trash     = "+marufcorp/Trash"
+set postponed  = "+marufcorp/Drafts"
+set trash      = "+marufcorp/Trash"
 set my_archive = "+marufcorp/Archive"
 unset record          # Gmail saves sent mail by itself
+# bottom bar + window title (see ~/.config/mail/neomutt-status)
+set my_status_cmd = "~/.config/mail/neomutt-status 'Maruf Jony' marufcorp@gmail.com marufcorp"
 
 unmailboxes *
-named-mailboxes "marufcorp" "+marufcorp/INBOX"
-named-mailboxes "  Sent"    "+marufcorp/Sent"
-named-mailboxes "  Drafts"  "+marufcorp/Drafts"
-named-mailboxes "  Archive" "+marufcorp/Archive"
-named-mailboxes "  Trash"   "+marufcorp/Trash"
+named-mailboxes "  Inbox"   "+marufcorp/INBOX"
+named-mailboxes "  Archive" "+marufcorp/Archive"
+named-mailboxes "  Sent"    "+marufcorp/Sent"
+named-mailboxes "  Drafts"  "+marufcorp/Drafts"
+named-mailboxes "  Trash"   "+marufcorp/Trash"
+source ~/.config/neomutt/unified.muttrc
 
 macro index,pager gi "<change-folder>+marufcorp/INBOX<enter>"   "inbox"
 macro index,pager ga "<change-folder>+marufcorp/Archive<enter>" "archive"
 macro index,pager gs "<change-folder>+marufcorp/Sent<enter>"    "sent"
 macro index,pager gd "<change-folder>+marufcorp/Drafts<enter>"  "drafts"
 macro index,pager gt "<change-folder>+marufcorp/Trash<enter>"   "trash"
+
+source "$my_status_cmd |"

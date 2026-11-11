@@ -33,6 +33,8 @@ set confirm_append = no
 set move           = no
 set abort_key      = "<Esc>"
 set mail_check_stats
+set help = no                # no key hints at the top (press ? for help)
+set ts_enabled               # window/tab title: name, address, folder
 
 # ------------------------------------------------------------------ index
 set use_threads  = threads
@@ -40,8 +42,11 @@ set sort         = reverse-last-date
 set sort_aux     = date
 set strict_threads
 set date_format  = "%d %b %H:%M"
-set index_format = "%4C %Z %D  %-22.22F %?X?📎 ?%s"
-set to_chars     = " +TCFL"
+set index_format = " %Z  %-22.22F  %?X? &  ?%s%* %D "
+# flag icons: tagged flagged deleted del-attach replied old new old-thread new-thread read read
+set flag_chars   = "  "
+set to_chars     = "      "
+set crypt_chars  = "     "
 set menu_scroll
 
 # ------------------------------------------------------------------ pager
@@ -82,16 +87,16 @@ set sidebar_width         = 28
 set sidebar_short_path
 set sidebar_folder_indent
 set sidebar_indent_string = "  "
-set sidebar_format        = "%D%?F? ★%F?%* %?N?%N/?%?S?%S?"
+set sidebar_format        = " %D%* %?F? %F ?%?N?%N ?"
+set sidebar_divider_char  = "│"
+set pager_format          = "  %n  │  %s%*  %P "
 set sidebar_non_empty_mailbox_only = no
 
 # ------------------------------------------------------------------ notmuch (search + unified inbox)
 set nm_default_url  = "notmuch:///Users/marufjony/.local/share/mail"
 set nm_record       = no
 set virtual_spool_file = no
-virtual-mailboxes "★ All inboxes" "notmuch://?query=folder:/INBOX$/"
-virtual-mailboxes "★ Unread"      "notmuch://?query=tag:unread and folder:/INBOX$/"
-virtual-mailboxes "★ Flagged"     "notmuch://?query=tag:flagged"
+# unified views: see unified.muttrc (sourced by each account file)
 
 # ------------------------------------------------------------------ keys (vim-like)
 bind index,pager g noop
@@ -130,11 +135,14 @@ bind index,pager B   sidebar-toggle-visible
 # search all accounts with notmuch: \ then a query (from:alice, subject:invoice, date:1w..)
 bind index,pager \\ vfolder-from-query
 # o = sync now
-macro index o "<shell-escape>~/.config/mail/mailsync<enter>" "sync all mail now"
+macro index o '<shell-escape>~/.config/mail/mailsync<enter><enter-command>source "$my_status_cmd |"<enter>' "sync all mail now"
+# refresh the bottom bar at start and every $timeout seconds while idle
+startup-hook 'source "$my_status_cmd |"'
+timeout-hook 'source "$my_status_cmd |"'
 # U = list the links in this message; pick one and it opens in your default browser
 macro index,pager U "<pipe-message>urlscan --dedupe --single --run-safe 'open {}'<enter>" "open a link in the browser"
 # gi/ga/gs/gd/gt = go to inbox, archive, sent, drafts, trash; gu = all inboxes
-macro index,pager gu "<change-vfolder>★ All inboxes<enter>" "unified inbox"
+macro index,pager gu "<change-vfolder>  All inboxes<enter>" "unified inbox"
 # A = archive (Gmail: removes from inbox, keeps in All Mail)
 macro index,pager A "<save-message>$my_archive<enter>" "archive"
 
