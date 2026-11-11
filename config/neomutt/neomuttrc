@@ -141,10 +141,11 @@ startup-hook 'source "$my_status_cmd |"'
 timeout-hook 'source "$my_status_cmd |"'
 # U = list the links in this message; pick one and it opens in your default browser
 macro index,pager U "<pipe-message>urlscan --dedupe --single --run-safe 'open {}'<enter>" "open a link in the browser"
-# gi/ga/gs/gd/gt = go to inbox, archive, sent, drafts, trash; gu = all inboxes
+# gi/gs/gd/gt = go to inbox, sent, drafts, trash; gu = all inboxes
 macro index,pager gu "<change-vfolder>  All inboxes<enter>" "unified inbox"
-# A = archive (Gmail: removes from inbox, keeps in All Mail)
-macro index,pager A "<save-message>$my_archive<enter>" "archive"
+# A = archive: remove from this folder without going to Trash. After the
+# next sync Gmail drops the Inbox label and keeps the mail in All Mail.
+bind index,pager A purge-message
 
 # attachments (press v on a message):
 #   Enter / l = full view in the terminal,  o = open in the macOS app,

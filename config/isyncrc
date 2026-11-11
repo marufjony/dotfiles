@@ -1,5 +1,7 @@
 # mbsync: copies mail from the server to ~/.local/share/mail (Maildir).
 # Run: mbsync -a   (the mailsync script does this every 5 minutes)
+# Archive (Gmail's "All Mail") isn't synced: it repeats every Inbox and Sent
+# message. Archiving = removing from Inbox; Gmail keeps it in All Mail.
 # Spam isn't synced: Gmail hides it from mail apps unless "Show in IMAP" is on.
 # Messages over 10 MB arrive as small placeholders. Flag one (F in neomutt)
 # and the next sync downloads the full message.
@@ -46,14 +48,8 @@ Channel marufcorp-trash
 Far ":marufcorp-remote:[Gmail]/Trash"
 Near :marufcorp-local:Trash
 
-# Gmail's "All Mail" = everything, including archived mail
-Channel marufcorp-archive
-Far ":marufcorp-remote:[Gmail]/All Mail"
-Near :marufcorp-local:Archive
-
 Group marufcorp
 Channel marufcorp-inbox
 Channel marufcorp-sent
 Channel marufcorp-drafts
 Channel marufcorp-trash
-Channel marufcorp-archive

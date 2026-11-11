@@ -30,7 +30,9 @@ Then: open a new terminal, press tmux prefix + `I` for plugins, run `nvm install
 ## Mail
 
 `neomutt` or `aerc` (shell functions in `.zshrc`) unlock `pass`, sync, then open.
-Mail lives in `~/.local/share/mail/<name>/`, never in git.
+Mail lives in `~/.local/share/mail/<name>/`, never in git. Gmail's "All Mail"
+(Archive) and Spam are not synced; archiving removes mail from the Inbox and
+Gmail keeps it in All Mail.
 
 | File | Job |
 |---|---|
