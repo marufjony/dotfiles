@@ -1,5 +1,6 @@
 # mbsync: copies mail from the server to ~/.local/share/mail (Maildir).
 # Run: mbsync -a   (the mailsync script does this every 5 minutes)
+# Spam isn't synced: Gmail hides it from mail apps unless "Show in IMAP" is on.
 # Messages over 10 MB arrive as small placeholders. Flag one (F in neomutt)
 # and the next sync downloads the full message.
 
@@ -45,10 +46,6 @@ Channel marufcorp-trash
 Far ":marufcorp-remote:[Gmail]/Trash"
 Near :marufcorp-local:Trash
 
-Channel marufcorp-spam
-Far ":marufcorp-remote:[Gmail]/Spam"
-Near :marufcorp-local:Spam
-
 # Gmail's "All Mail" = everything, including archived mail
 Channel marufcorp-archive
 Far ":marufcorp-remote:[Gmail]/All Mail"
@@ -59,5 +56,4 @@ Channel marufcorp-inbox
 Channel marufcorp-sent
 Channel marufcorp-drafts
 Channel marufcorp-trash
-Channel marufcorp-spam
 Channel marufcorp-archive

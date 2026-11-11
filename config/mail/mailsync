@@ -8,8 +8,15 @@ set -u
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 lock="${TMPDIR:-/tmp}/mailsync.$(id -u).lock"
-mkdir "$lock" 2>/dev/null || { echo "mailsync is already running"; exit 0; }
-trap 'rmdir "$lock"' EXIT
+if ! mkdir "$lock" 2>/dev/null; then
+  # a lock left by a sync that was killed is cleared; a live one wins
+  if kill -0 "$(cat "$lock/pid" 2>/dev/null)" 2>/dev/null; then
+    echo "mailsync is already running"; exit 0
+  fi
+  rm -rf "$lock"; mkdir "$lock" || exit 1
+fi
+echo $$ > "$lock/pid"
+trap 'rm -rf "$lock"' EXIT
 
 mkdir -p "$HOME/.local/share/mail" "$HOME/.local/state/msmtp" "$HOME/.local/state/isync"
 
@@ -32,5 +39,16 @@ if [ "$first_run" = 0 ] && [ "$count" -gt 0 ]; then
             -e 'end run' "$count new mail" "$body" >/dev/null 2>&1
 fi
 notmuch tag -new -- tag:new
+
+# Status for aerc's bottom bar (aerc/filters/mail-status reads these files)
+result=ok; [ "$rc" -ne 0 ] && result=failed
+mkdir -p "$HOME/.local/state/mail"
+for dir in "$HOME/.local/share/mail"/*/; do
+  acct=$(basename "$dir")
+  # when syncing named accounts, only update those
+  if [ $# -gt 0 ] && ! printf '%s\n' "$@" | grep -qx "$acct"; then continue; fi
+  printf 'size_kb=%s\nsynced=%s\nresult=%s\n' \
+    "$(du -sk "$dir" | cut -f1)" "$(date +%s)" "$result" > "$HOME/.local/state/mail/$acct.status"
+done
 
 exit "$rc"

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# One field of mail status for aerc's bottom bar (fast: reads a small file).
+#   mail-status size  <account>   e.g. 3.8 GB
+#   mail-status synced <account>  e.g. 14:05 11/11/26
+#   mail-status state <account>   Syncing | Connected | Disconnected | Not synced
+# mailsync writes ~/.local/state/mail/<account>.status after every sync.
+field="$1" acct="$2"
+maildir="$HOME/.local/share/mail/$acct"
+status="$HOME/.local/state/mail/$acct.status"
+size_kb="" synced="" result=""
+# shellcheck source=/dev/null
+[ -r "$status" ] && . "$status"
+
+case "$field" in
+  size)
+    [ -z "$size_kb" ] && size_kb=$(du -sk "$maildir" 2>/dev/null | cut -f1)
+    awk -v k="${size_kb:-0}" 'BEGIN {
+      if (k >= 1048576) printf "%.1f GB", k / 1048576
+      else              printf "%.0f MB", k / 1024 }'
+    ;;
+  synced)
+    if [ -z "$synced" ]; then   # before the first mailsync: mbsync's own state files
+      synced=$(find "$maildir" -maxdepth 2 -name .mbsyncstate -exec stat -f %m {} + 2>/dev/null | sort -n | tail -1)
+    fi
+    if [ -n "$synced" ]; then date -r "$synced" '+%H:%M %d/%m/%y' | tr -d '\n'; else printf 'never'; fi
+    ;;
+  state)
+    lock="${TMPDIR:-/tmp}/mailsync.$(id -u).lock"
+    if kill -0 "$(cat "$lock/pid" 2>/dev/null)" 2>/dev/null; then printf 'Syncing'
+    elif [ "$result" = ok ]; then printf 'Connected'
+    elif [ "$result" = failed ]; then printf 'Disconnected'
+    elif find "$maildir" -maxdepth 2 -name .mbsyncstate 2>/dev/null | grep -q .; then printf 'Connected'
+    else printf 'Not synced'
+    fi
+    ;;
+esac

@@ -12,7 +12,6 @@ named-mailboxes "marufcorp" "+marufcorp/INBOX"
 named-mailboxes "  Sent"    "+marufcorp/Sent"
 named-mailboxes "  Drafts"  "+marufcorp/Drafts"
 named-mailboxes "  Archive" "+marufcorp/Archive"
-named-mailboxes "  Spam"    "+marufcorp/Spam"
 named-mailboxes "  Trash"   "+marufcorp/Trash"
 
 macro index,pager gi "<change-folder>+marufcorp/INBOX<enter>"   "inbox"

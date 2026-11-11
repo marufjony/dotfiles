@@ -32,7 +32,6 @@ border.fg=#45475a
 spinner.fg=#cba6f7
 
 # status line along the bottom
-statusline_default.fg=#a6adc8
 statusline_default.bg=#181825
 statusline_error.fg=#f38ba8
 statusline_error.bold=true
@@ -100,6 +99,17 @@ folder-spam.fg=#fab387
 folder-trash.fg=#f38ba8
 count.fg=#cba6f7
 count.bold=true
+# bottom bar
+sb-unread.fg=#89b4fa
+sb-unread.bold=true
+sb-size.fg=#fab387
+sb-sync.fg=#94e2d5
+sb-sep.fg=#45475a
+sb-ok.fg=#a6e3a1
+sb-ok.bold=true
+sb-busy.fg=#f9e2af
+sb-bad.fg=#f38ba8
+sb-bad.bold=true
 
 # message body (aerc's colorize filter)
 [viewer]
