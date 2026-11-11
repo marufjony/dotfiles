@@ -1,0 +1,124 @@
+# Catppuccin Mocha for aerc (matches neomutt/colors.muttrc)
+# rosewater #f5e0dc  flamingo #f2cdcd  pink #f5c2e7   mauve #cba6f7
+# red #f38ba8        maroon #eba0ac    peach #fab387  yellow #f9e2af
+# green #a6e3a1      teal #94e2d5      sky #89dceb    sapphire #74c7ec
+# blue #89b4fa       lavender #b4befe  text #cdd6f4   subtext1 #bac2de
+# subtext0 #a6adc8   overlay2 #9399b2  overlay1 #7f849c overlay0 #6c7086
+# surface2 #585b70   surface1 #45475a  surface0 #313244 base #1e1e2e
+# mantle #181825     crust #11111b
+# Backgrounds and plain text use the terminal's own colours (already
+# Catppuccin). No global fg on purpose: it would block the [user] column colours.
+
+*.normal=true
+
+error.fg=#f38ba8
+error.bold=true
+warning.fg=#fab387
+success.fg=#a6e3a1
+title.fg=#cba6f7
+title.bold=true
+header.fg=#89b4fa
+header.bold=true
+
+# tabs across the top
+tab.fg=#7f849c
+tab.bg=#181825
+tab.selected.fg=#1e1e2e
+tab.selected.bg=#cba6f7
+tab.selected.bold=true
+stack.bg=#181825
+
+border.fg=#45475a
+spinner.fg=#cba6f7
+
+# status line along the bottom
+statusline_default.fg=#a6adc8
+statusline_default.bg=#181825
+statusline_error.fg=#f38ba8
+statusline_error.bold=true
+statusline_success.fg=#a6e3a1
+statusline_success.bold=true
+
+# folder list (left)
+dirlist_unread.fg=#89b4fa
+dirlist_unread.bold=true
+dirlist_recent.fg=#94e2d5
+dirlist_*.selected.fg=#cba6f7
+dirlist_*.selected.bg=#313244
+dirlist_*.selected.bold=true
+
+# message list (middle). Column colours come from the [user] styles below,
+# used in aerc.conf's column-* templates; rows only add bold/dim/background.
+msglist_unread.bold=true
+msglist_read.dim=false
+msglist_deleted.dim=true
+msglist_result.fg=#f9e2af
+msglist_marked.bg=#45475a
+msglist_*.selected.bg=#313244
+msglist_*.selected.bold=true
+msglist_gutter.bg=#313244
+msglist_pill.bg=#cba6f7
+msglist_thread_folded.fg=#fab387
+msglist_thread_context.fg=#6c7086
+
+# attachment/part list in the message view
+part_switcher.bg=#181825
+part_switcher.selected.bg=#313244
+part_filename.fg=#fab387
+part_filename.selected.fg=#f9e2af
+part_filename.selected.bg=#313244
+part_mimetype.fg=#7f849c
+part_mimetype.selected.fg=#bac2de
+part_mimetype.selected.bg=#313244
+
+# completion pop-ups and choice dialogs
+completion_default.fg=#cdd6f4
+completion_default.bg=#313244
+completion_default.selected.fg=#1e1e2e
+completion_default.selected.bg=#cba6f7
+completion_description.fg=#7f849c
+completion_gutter.bg=#313244
+completion_pill.bg=#cba6f7
+selector_default.fg=#cdd6f4
+selector_default.bg=#313244
+selector_focused.fg=#1e1e2e
+selector_focused.bg=#cba6f7
+selector_chooser.bold=true
+
+[user]
+sender.fg=#b4befe
+date.fg=#7f849c
+flag-new.fg=#89b4fa
+flag-flagged.fg=#f9e2af
+flag-replied.fg=#a6e3a1
+flag-attach.fg=#fab387
+folder-inbox.fg=#89b4fa
+folder-sent.fg=#a6e3a1
+folder-archive.fg=#94e2d5
+folder-drafts.fg=#f9e2af
+folder-spam.fg=#fab387
+folder-trash.fg=#f38ba8
+count.fg=#cba6f7
+count.bold=true
+
+# message body (aerc's colorize filter)
+[viewer]
+header.fg=#cba6f7
+header.bold=true
+url.fg=#74c7ec
+url.underline=true
+signature.fg=#6c7086
+signature.dim=true
+quote_1.fg=#b4befe
+quote_2.fg=#94e2d5
+quote_3.fg=#fab387
+quote_4.fg=#f5c2e7
+quote_x.fg=#7f849c
+code.fg=#a6e3a1
+diff_meta.bold=true
+diff_chunk.fg=#89dceb
+diff_chunk_func.fg=#89dceb
+diff_chunk_func.bold=true
+diff_add.fg=#a6e3a1
+diff_del.fg=#f38ba8
+diff_whitespace.bg=#f38ba8
