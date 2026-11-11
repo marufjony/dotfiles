@@ -111,6 +111,9 @@ aerc() {
   local list=$(( COLUMNS * 35 / 100 - 20 )) conf=${TMPDIR:-/tmp}/aerc-$UID.conf
   (( list < 30 )) && list=30
   sed "s/^message-list-split = .*/message-list-split = vertical $list/" ~/.config/aerc/aerc.conf >| $conf
+  # a copy of aerc left behind by a closed tab keeps this socket and makes
+  # every new aerc hang; clear it when no aerc is running
+  pgrep -qx aerc || rm -f ~/Library/Application\ Support/aerc.sock
   # ~/Library/Preferences/aerc links to ~/.config/aerc (see install.sh)
   command aerc -C $conf "$@"
 }
