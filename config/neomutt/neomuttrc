@@ -52,7 +52,7 @@ set tilde
 unset markers
 set smart_wrap
 set allow_ansi
-auto_view text/html application/pdf image/* application/vnd.openxmlformats-officedocument.wordprocessingml.document application/vnd.openxmlformats-officedocument.spreadsheetml.sheet text/csv
+auto_view text/html application/pdf application/vnd.openxmlformats-officedocument.wordprocessingml.document application/vnd.openxmlformats-officedocument.spreadsheetml.sheet text/csv
 alternative_order text/plain text/enriched text/html
 ignore *
 unignore from: to: cc: date: subject: reply-to:
@@ -139,12 +139,11 @@ macro index,pager gu "<change-vfolder>★ All inboxes<enter>" "unified inbox"
 macro index,pager A "<save-message>$my_archive<enter>" "archive"
 
 # attachments (press v on a message):
-#   Enter / l = open in the macOS app,  t = view in the terminal,
-#   Y = open in yazi,  S = save to Downloads
-macro attach <return> "<enter-command>set mailcap_path=$my_cfg/mailcap.open<enter><view-mailcap><enter-command>set mailcap_path=$my_cfg/mailcap<enter>" "open in macOS app"
-macro attach l "<enter-command>set mailcap_path=$my_cfg/mailcap.open<enter><view-mailcap><enter-command>set mailcap_path=$my_cfg/mailcap<enter>" "open in macOS app"
-bind  attach t view-mailcap
-macro attach Y "<enter-command>set mailcap_path=$my_cfg/mailcap.yazi<enter><view-mailcap><enter-command>set mailcap_path=$my_cfg/mailcap<enter>" "open in yazi"
+#   Enter / l = full view in the terminal,  o = open in the macOS app,
+#   S = save to Downloads
+bind  attach <return> view-mailcap
+bind  attach l view-mailcap
+macro attach o "<enter-command>set mailcap_path=$my_cfg/mailcap.open<enter><view-mailcap><enter-command>set mailcap_path=$my_cfg/mailcap<enter>" "open in macOS app"
 macro attach S "<save-entry><kill-line>~/Downloads/<enter>" "save to Downloads"
 
 # ------------------------------------------------------------------ accounts

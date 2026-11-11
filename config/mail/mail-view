@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# Full-screen view of an attachment inside the terminal.
+#   PDF     pages as images (q quit, j/n/space next, k/p previous, o open in Preview)
+#           or as text in a pager where images can't be shown (herdr)
+#   image   fitted to the window (q quit, o open in Preview)
+#   docx/odt  as text in a pager
+#   xlsx/csv  in VisiData
+#   (old .doc/.xls and anything else open in the macOS app)
+#   html    in w3m
+#   other   handed to the macOS app
+# The file type is taken from the content, so attachments sent as
+# "application/octet-stream" work too.
+#   mail-view [--text] FILE    (FILE may be - for stdin, as aerc sends it)
+#   --text  never use terminal graphics (aerc's built-in terminal can't show them)
+here="$(dirname "$0")"
+text_only=0
+[ "${1:-}" = "--text" ] && { text_only=1; shift; }
+file="${1:--}"
+if [ "$file" = - ]; then
+  tmpin=$(mktemp -d "${TMPDIR:-/tmp}/mail-view.XXXXXX")
+  cat > "$tmpin/in"
+  case "$(file -b --mime-type "$tmpin/in")" in
+    application/pdf) ext=pdf ;;  image/png) ext=png ;;  image/jpeg) ext=jpg ;;
+    image/gif) ext=gif ;;  image/webp) ext=webp ;;  text/html) ext=html ;;
+    text/csv) ext=csv ;;
+    *wordprocessingml*) ext=docx ;;  *spreadsheetml*) ext=xlsx ;;
+    *) ext=bin ;;
+  esac
+  mv "$tmpin/in" "$tmpin/attachment.$ext"
+  file="$tmpin/attachment.$ext"
+fi
+
+# Which image format this terminal understands
+fmt=symbols
+if [ -z "${HERDR_ENV:-}" ]; then
+  case "${TERM_PROGRAM:-}" in
+    ghostty)            fmt=kitty ;;
+    WezTerm|iTerm.app)  fmt=iterm ;;
+  esac
+  [ "${TERM:-}" = xterm-kitty ] && fmt=kitty
+fi
+[ "$text_only" = 1 ] && fmt=symbols
+
+show() {   # show an image file full screen
+  clear
+  chafa -f "$fmt" --polite=on --align=center,center \
+        --size="$(tput cols)x$(( $(tput lines) - 2 ))" "$1"
+  tput cup "$(( $(tput lines) - 1 ))" 0
+}
+cleanup() {
+  [ "$fmt" = kitty ] && printf '\033_Ga=d,d=A\033\134'
+  clear
+}
+
+mime=$(file -b --mime-type "$file")
+name=$(basename "$file" | tr '[:upper:]' '[:lower:]')
+
+case "$mime:$name" in
+  application/pdf:*|*:*.pdf)
+    if [ "$fmt" = symbols ]; then
+      pdftotext -layout "$file" - | less -R
+      exit
+    fi
+    pages=$(pdfinfo "$file" 2>/dev/null | awk '/^Pages:/{print $2}')
+    pages=${pages:-1}
+    tmp=$(mktemp -d "${TMPDIR:-/tmp}/mail-pdf.XXXXXX")
+    trap 'rm -rf "$tmp"' EXIT
+    page=1
+    while :; do
+      img="$tmp/p$page.png"
+      [ -f "$img" ] || pdftoppm -png -r 110 -f "$page" -l "$page" -singlefile "$file" "${img%.png}"
+      show "$img"
+      printf ' page %s/%s   j/n next  k/p previous  o open in Preview  q back' "$page" "$pages"
+      read -rsn1 key </dev/tty
+      case "$key" in
+        q|h) break ;;
+        o)   "$here/mail-open" "$file"; break ;;
+        j|n|' '|'') [ "$page" -lt "$pages" ] && page=$((page + 1)) ;;
+        k|p) [ "$page" -gt 1 ] && page=$((page - 1)) ;;
+      esac
+    done
+    cleanup
+    ;;
+  image/*:*)
+    show "$file"
+    printf ' o open in Preview   any other key back'
+    read -rsn1 key </dev/tty
+    cleanup
+    [ "$key" = o ] && "$here/mail-open" "$file"
+    ;;
+  *wordprocessingml*:*|*:*.docx)
+    pandoc -f docx -t plain "$file" | less -R
+    ;;
+  *opendocument.text*:*|*:*.odt)
+    pandoc -f odt -t plain "$file" | less -R
+    ;;
+  *spreadsheetml*:*|*:*.xlsx)
+    vd -f xlsx "$file"
+    ;;
+  text/csv:*|*:*.csv)
+    vd -f csv "$file"
+    ;;
+  text/html:*|*:*.html|*:*.htm)
+    w3m -T text/html "$file"
+    ;;
+  text/*:*)
+    less -R "$file"
+    ;;
+  *)
+    "$here/mail-open" "$file"
+    ;;
+esac
+[ -n "${tmpin:-}" ] && rm -rf "$tmpin"
+exit 0
