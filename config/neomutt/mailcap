@@ -11,7 +11,7 @@
 # first matching line marked copiousoutput.
 
 # full view (Enter / l)
-text/html; w3m -I %{charset} -T text/html %s; needsterminal; nametemplate=%s.html
+text/html; ~/.config/mail/mail-html --osc8 %s | less -R; needsterminal; nametemplate=%s.html
 application/*; ~/.config/mail/mail-view %s; needsterminal
 image/*; ~/.config/mail/mail-view %s; needsterminal
 text/*; ~/.config/mail/mail-view %s; needsterminal
@@ -19,7 +19,7 @@ audio/*; ~/.config/mail/mail-open %s
 video/*; ~/.config/mail/mail-open %s
 
 # text previews shown inside the message
-text/html; w3m -I %{charset} -T text/html -dump -o display_link_number=1 %s; copiousoutput; nametemplate=%s.html
+text/html; ~/.config/mail/mail-html %s; copiousoutput; nametemplate=%s.html
 application/pdf; pdftotext -layout -l 20 %s -; copiousoutput
 application/vnd.openxmlformats-officedocument.wordprocessingml.document; pandoc -f docx -t plain %s; copiousoutput
 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; ~/.config/mail/xlsx-preview %s; copiousoutput

@@ -1,0 +1,88 @@
+#!/usr/bin/env -S python3 -I
+"""Render an HTML email as text with links you can click.
+
+  mail-html [--osc8] [FILE]     (reads stdin without FILE)
+
+--osc8  Link text becomes a real hyperlink (Cmd/Ctrl-click opens your browser
+        in Ghostty, WezTerm, kitty, iTerm, Warp). The long URL list is hidden.
+        Used by aerc and by neomutt's full HTML view (H), via less -R.
+plain   For neomutt's message view, which can't show hyperlinks: links keep
+        their [n] numbers and the list at the bottom shows each URL with
+        tracking junk removed, so it fits on one line and Cmd-click works.
+        U (urlscan) in neomutt still lists the exact original links.
+"""
+import os
+import re
+import subprocess
+import sys
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
+osc8 = "--osc8" in sys.argv[1:]
+args = [a for a in sys.argv[1:] if a != "--osc8"]
+html = open(args[0], "rb").read() if args else sys.stdin.buffer.read()
+
+cols = os.environ.get("COLUMNS", "")
+cols = int(cols) if cols.isdigit() and 40 <= int(cols) <= 160 else 100
+
+text = subprocess.run(
+    ["w3m", "-I", "UTF-8", "-O", "UTF-8", "-T", "text/html", "-dump",
+     "-cols", str(cols), "-o", "display_link_number=1"],
+    input=html, capture_output=True,
+).stdout.decode("utf-8", "replace")
+
+# split body / "References:" list
+body, refs = text, {}
+m = re.search(r"\n\s*References:\s*\n", text)
+if m:
+    body = text[: m.start()]
+    for line in text[m.end():].splitlines():
+        r = re.match(r"\s*\[(\d+)\]\s+(\S+)", line)
+        if r:
+            refs[r.group(1)] = r.group(2)
+
+TRACKING = re.compile(
+    r"^(utm_.*|lipi|midToken|midSig|trk|trkEmail|eid|otpToken|trackingId|refId|"
+    r"mc_cid|mc_eid|_hsenc|_hsmi|fbclid|gclid|ref|src|cid)$")
+
+
+def clean(url):
+    """URL without tracking parameters (and LinkedIn's /comm/ redirect)."""
+    try:
+        p = urlsplit(url)
+    except ValueError:
+        return url
+    q = [(k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if not TRACKING.match(k)]
+    path = p.path
+    if p.netloc.endswith("linkedin.com") and path.startswith("/comm/"):
+        path = path[5:]
+    return urlunsplit((p.scheme, p.netloc, path, urlencode(q), ""))
+
+
+BLUE, DIM, RESET = "\033[4;38;5;117m", "\033[38;5;243m", "\033[0m"
+LINK_ICON = ""
+
+# drop LinkedIn-style lines made only of invisible filler characters
+body = "\n".join(l for l in body.splitlines() if l.strip(" ͏‌​­\xa0"))
+body = re.sub(r"\n{3,}", "\n\n", body)
+
+if osc8:
+    def link(mo):
+        n, label = mo.group(1), mo.group(2)
+        url = refs.get(n)
+        if not url:
+            return mo.group(0)
+        stripped = label.rstrip()
+        shown = stripped if stripped else LINK_ICON
+        tail = label[len(stripped):]
+        return f"\033]8;;{url}\033\\{BLUE}{shown}{RESET}\033]8;;\033\\{tail}"
+    body = re.sub(r"\[(\d+)\]([^\[\n]*)", link, body)
+    sys.stdout.write(body.rstrip() + "\n")
+else:
+    body = re.sub(r"\[(\d+)\]", lambda mo: f"{DIM}[{mo.group(1)}]{RESET}", body)
+    out = [body.rstrip(), "", f"{DIM}Links (U lists the exact originals):{RESET}"]
+    groups = {}
+    for n, url in refs.items():
+        groups.setdefault(clean(url), []).append(n)
+    for c, ns in groups.items():
+        out.append(f"{DIM}[{' '.join(ns)}]{RESET} {BLUE}{c}{RESET}")
+    sys.stdout.write("\n".join(out) + "\n")

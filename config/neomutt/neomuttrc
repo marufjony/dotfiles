@@ -58,7 +58,7 @@ unset markers
 set smart_wrap
 set allow_ansi
 auto_view text/html application/pdf application/vnd.openxmlformats-officedocument.wordprocessingml.document application/vnd.openxmlformats-officedocument.spreadsheetml.sheet text/csv
-alternative_order text/plain text/enriched text/html
+alternative_order text/html text/plain text/enriched
 ignore *
 unignore from: to: cc: date: subject: reply-to:
 hdr_order from: to: cc: date: subject:
@@ -139,6 +139,8 @@ macro index o '<shell-escape>~/.config/mail/mailsync<enter><enter-command>source
 # refresh the bottom bar at start and every $timeout seconds while idle
 startup-hook 'source "$my_status_cmd |"'
 timeout-hook 'source "$my_status_cmd |"'
+# H = this email full screen with clickable links (Cmd-click opens the browser)
+macro index,pager H "<view-attachments>/text/html<enter><view-mailcap><exit>" "HTML view, clickable links"
 # U = list the links in this message; pick one and it opens in your default browser
 macro index,pager U "<pipe-message>urlscan --dedupe --single --run-safe 'open {}'<enter>" "open a link in the browser"
 # gi/gs/gd/gt = go to inbox, sent, drafts, trash; gu = all inboxes
