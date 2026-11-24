@@ -22,7 +22,7 @@ Then: open a new terminal, press tmux prefix + `I` for plugins, run `nvm install
 ## Day to day
 
 - Edit files in place (`~/.config/...`); they are links into this repo. Commit from here.
-- New config: copy it into `config/` at the same path, then `stow --adopt --no-folding -t ~/.config config`.
+- New app settings: run `dot`. It lists what's in `~/.config` but not in this repo, lets you pick (Tab marks, Enter saves), checks each pick for secrets, moves it here, links it back, commits, and asks before pushing. A second list lets you mark things to never ask about again (kept in `.dotignore`). New shells print a one-line reminder when something is waiting. Also `dot status` (just list) and `dot ignored` (edit the never-ask list).
 - Update the Brewfile: `brew bundle dump --file=Brewfile --force`.
 - A gitleaks pre-commit hook blocks secrets. Secrets live in `pass` and the macOS Keychain, never here.
 - If an app replaces a link with a plain file, `git status` stops showing your edits; re-run `./install.sh`.

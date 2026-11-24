@@ -117,3 +117,12 @@ aerc() {
   # ~/Library/Preferences/aerc links to ~/.config/aerc (see install.sh)
   command aerc -C $conf "$@"
 }
+
+# dot: a one-line reminder when an app has put settings in ~/.config that
+# aren't in the dotfiles repo yet (run `dot` to choose, `dot help` for more)
+if (( $+commands[dot] )); then
+  () {
+    local n=$(dot --count 2>/dev/null)
+    (( n > 0 )) && print -P "%F{183}dot:%f $n new item(s) in ~/.config aren't in your dotfiles yet. Run %F{147}dot%f to choose."
+  }
+fi

@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+# dot: save new app settings from ~/.config into the dotfiles repo.
+#
+#   dot           pick what to save (Tab marks, Enter confirms), then commit
+#                 and optionally push to GitHub
+#   dot status    just list what isn't saved yet
+#   dot ignored   edit the "never ask about these" list
+#   dot --count   number of unsaved items (used by the shell reminder)
+#
+# "Saving" moves the folder or file into ~/Developer/dotfiles/config and
+# links it back, so the app keeps working and every later change shows up
+# in git. Each item is checked for secrets with gitleaks before it moves.
+set -euo pipefail
+
+REPO="${DOTFILES:-$HOME/Developer/dotfiles}"
+CFG="$HOME/.config"
+PKG="$REPO/config"
+IGNORE="$REPO/.dotignore"
+BIG=$((10 * 1024))   # KB; ask before saving anything larger
+
+c() { printf '\033[%sm' "$1"; }
+say()  { printf '%s%s%s\n' "$(c '38;5;183')" "$*" "$(c 0)"; }
+warn() { printf '%s%s%s\n' "$(c '38;5;216')" "$*" "$(c 0)" >&2; }
+die()  { printf '%s%s%s\n' "$(c '38;5;211')" "$*" "$(c 0)" >&2; exit 1; }
+
+[ -d "$PKG" ] || die "dotfiles repo not found at $REPO"
+touch "$IGNORE"
+
+# the ignore list without comments/blank lines, one path per line
+ignore_list() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' -e 's|/$||' -e '/^$/d' "$IGNORE"; }
+
+# drop paths (stdin) that are on the ignore list or covered by them
+drop_ignored() {
+  awk 'NR==FNR { ig[$0]=1; next }
+       { p=$0; while (1) { if (p in ig) next; if (p !~ /\//) break; sub(/\/[^\/]*$/, "", p) } print }' \
+      <(ignore_list) -
+}
+
+# Each unsaved item, one path per line, relative to ~/.config:
+#  - a folder or file the repo doesn't have at all (a new app)
+#  - inside an app the repo already has, a new file or the topmost new
+#    folder (so a folder of 300 snapshots is one item, not 300)
+raw_candidates() {
+  local p name
+  for p in "$CFG"/* "$CFG"/.[!.]*; do
+    [ -e "$p" ] || [ -L "$p" ] || continue
+    name="${p##*/}"
+    [ "$name" = .DS_Store ] || [ -L "$p" ] && continue   # links are already saved
+    if [ -e "$PKG/$name" ]; then
+      [ -d "$p" ] && find "$p" -type f ! -name .DS_Store 2>/dev/null
+    elif [ -d "$p" ]; then                      # new app: skip while empty
+      [ -n "$(find "$p" -type f ! -name .DS_Store -print -quit 2>/dev/null)" ] && echo "$p"
+    else
+      echo "$p"
+    fi
+  done | sed "s|^$CFG/||" | drop_ignored |
+  awk 'NR==FNR { have[$0]=1; next }      # every path the repo has
+       { n=split($0, c, "/"); p=c[1]
+         for (i=2; i<=n && (p in have); i++) p = p "/" c[i]
+         if (!(p in seen)) { seen[p]=1; print p } }' \
+      <(cd "$PKG" && find . -mindepth 1 | sed 's|^\./||') -
+}
+
+candidates() {
+  local list
+  list=$(raw_candidates)
+  [ -z "$list" ] && return 0
+  # drop what .gitignore already keeps out (tokens, logs, sockets...)
+  awk 'NR==FNR { skip[$0]=1; next } !($0 in skip)' \
+      <(printf '%s\n' "$list" | sed 's|^|config/|' |
+        git -C "$REPO" check-ignore --no-index --stdin 2>/dev/null | sed 's|^config/||' || true) \
+      <(printf '%s\n' "$list")
+}
+
+describe() {  # rel -> "rel<TAB>aligned row"
+  local rel="$1" size kind
+  size=$(du -sh "$CFG/$rel" 2>/dev/null | cut -f1 | tr -d ' ')
+  if [ -e "$PKG/${rel%%/*}" ] && [ -d "$CFG/$rel" ]; then kind="new folder in ${rel%%/*}"
+  elif [ -e "$PKG/${rel%%/*}" ]; then kind="new file in ${rel%%/*}"
+  elif [ -d "$CFG/$rel" ]; then kind="new app folder"
+  else kind="new file"; fi
+  printf '%s\t%-34s %6s   %s\n' "$rel" "$rel" "$size" "$kind"
+}
+
+table() { while IFS= read -r rel; do describe "$rel"; done; }
+
+preview='p="$HOME/.config/"{1}; if [ -d "$p" ]; then
+  echo "Files:"; find "$p" -type f ! -name .DS_Store | sed "s|$HOME/.config/||" | head -60
+else head -80 "$p"; fi'
+
+pick() {  # $1 header; reads table on stdin, prints chosen paths
+  fzf --multi --ansi --delimiter='\t' --with-nth=2 \
+      --header="$1" --header-first --layout=reverse --height=80% \
+      --border=rounded --prompt='dot › ' --marker='✓ ' --pointer='▶' \
+      --color='border:#45475a,header:#cba6f7,prompt:#cba6f7,pointer:#f5c2e7,marker:#a6e3a1,hl:#89b4fa,hl+:#89b4fa,fg+:#cdd6f4,bg+:#313244' \
+      --preview="$preview" --preview-window='right,50%,border-left' \
+      --bind='ctrl-a:select-all,ctrl-d:deselect-all' | cut -f1 || true
+}
+
+has_secrets() {
+  gitleaks dir --no-banner --redact --exit-code 1 "$CFG/$1" >/dev/null 2>&1 && return 1
+  return 0
+}
+
+save() {  # move each path into the repo, link it back, commit
+  local rel saved=() kb
+  for rel in "$@"; do
+    kb=$(du -sk "$CFG/$rel" | cut -f1)
+    if [ "$kb" -gt "$BIG" ]; then
+      printf '%s is %s MB. Save it anyway? [y/N] ' "$rel" "$((kb / 1024))"
+      read -r a </dev/tty; [ "$a" = y ] || [ "$a" = Y ] || { warn "skipped $rel"; continue; }
+    fi
+    if has_secrets "$rel"; then
+      warn "skipped $rel: gitleaks found something that looks like a password or token:"
+      gitleaks dir --no-banner --redact -v "$CFG/$rel" 2>&1 | sed 's/\x1b\[[0-9;]*m//g' |
+        awk '/^RuleID:/{r=$2} /^File:/{sub(/^File: */,""); sub(ENVIRON["HOME"]"/.config/",""); f=$0} /^Line:/{print "    " r " in " f " line " $2}' >&2 || true
+      warn "    move the secret into pass (or add the file to .gitignore), then run dot again"
+      continue
+    fi
+    mkdir -p "$(dirname "$PKG/$rel")"
+    mv "$CFG/$rel" "$PKG/$rel"
+    saved+=("$rel")
+  done
+  [ ${#saved[@]} -eq 0 ] && return 0
+
+  if ! stow --no-folding -d "$REPO" -t "$CFG" config 2>/tmp/dot-stow.$$; then
+    warn "linking failed, putting things back:"; sed 's/^/    /' /tmp/dot-stow.$$ >&2
+    for rel in "${saved[@]}"; do
+      rm -rf "${CFG:?}/$rel"; mv "$PKG/$rel" "$CFG/$rel"
+    done
+    rm -f /tmp/dot-stow.$$; exit 1
+  fi
+  rm -f /tmp/dot-stow.$$
+  for rel in "${saved[@]}"; do
+    git -C "$REPO" add -- "config/$rel"
+    say "✓ saved $rel"
+  done
+  SAVED=("${saved[@]}")
+}
+
+commit_and_push() {
+  git -C "$REPO" add -- .dotignore
+  git -C "$REPO" diff --cached --quiet && return 0
+  local msg="dot: $1"
+  git -C "$REPO" commit -q -m "$msg" || die "commit blocked (see above); nothing was pushed"
+  say "✓ committed: $msg"
+  printf 'Push to GitHub now? [y/N] '
+  read -r a </dev/tty
+  if [ "$a" = y ] || [ "$a" = Y ]; then
+    git -C "$REPO" push -q && say "✓ pushed"
+  else
+    echo "Not pushed. Later: git -C ~/Developer/dotfiles push"
+  fi
+}
+
+case "${1:-}" in
+  --count) candidates | grep -c . || true; exit 0 ;;
+  status)
+    list=$(candidates)
+    [ -z "$list" ] && { say "Everything in ~/.config is saved."; exit 0; }
+    printf '%s\n' "$list" | table | cut -f2-
+    echo; echo "Run dot to choose what to save."; exit 0 ;;
+  ignored) exec "${EDITOR:-nvim}" "$IGNORE" ;;
+  -h|--help|help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  "") ;;
+  *) die "unknown command: $1 (try dot help)" ;;
+esac
+
+list=$(candidates)
+[ -z "$list" ] && { say "Everything in ~/.config is saved."; exit 0; }
+command -v fzf >/dev/null || die "needs fzf: brew install fzf"
+
+rows=$(printf '%s\n' "$list" | table)
+chosen=$(printf '%s\n' "$rows" | pick 'Save to dotfiles · Tab mark · Ctrl-a all · Enter save · Esc skip')
+
+SAVED=()
+if [ -n "$chosen" ]; then
+  # shellcheck disable=SC2046
+  IFS=$'\n'; save $chosen; unset IFS
+fi
+
+# offer to silence the rest
+rest=$(printf '%s\n' "$rows" | while IFS=$'\t' read -r rel row; do
+  printf '%s\n' "$chosen" | grep -qxF -- "$rel" || printf '%s\t%s\n' "$rel" "$row"
+done)
+never=""
+if [ -n "$rest" ]; then
+  never=$(printf '%s\n' "$rest" | pick 'Never ask again? · Tab mark · Enter confirm · Esc keep asking')
+  if [ -n "$never" ]; then
+    printf '%s\n' "$never" >> "$IGNORE"
+    printf '%s\n' "$never" | while IFS= read -r rel; do say "✓ won't ask about $rel again"; done
+  fi
+fi
+
+parts=()
+[ ${#SAVED[@]} -gt 0 ] && parts+=("save ${SAVED[*]}")
+[ -n "$never" ] && parts+=("ignore $(printf '%s\n' "$never" | paste -sd ' ' -)")
+[ ${#parts[@]} -gt 0 ] && commit_and_push "$(printf '%s; ' "${parts[@]}" | sed 's/; $//')"
+exit 0

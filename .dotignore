@@ -1,0 +1,16 @@
+# Things in ~/.config that dot should never offer to save (one per line,
+# relative to ~/.config; a folder covers everything inside it).
+# Edit with: dot ignored
+
+# app state, caches, logs and history, not settings
+raycast
+mole
+psysh
+.nvm
+herdr/session-snapshots
+herdr/session.json
+herdr/.plugins.lock
+tmux/plugins
+# private: shell history and zsh's completion cache
+zsh/.zsh_history
+zsh/.zcompdump

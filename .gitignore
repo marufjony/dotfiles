@@ -10,3 +10,6 @@ karabiner/karabiner/automatic_backups/
 *.log
 *.sock
 hosts.yml
+
+# Login tokens apps write next to their settings (e.g. composer)
+auth.json
