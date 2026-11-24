@@ -31,7 +31,7 @@ mkdir -p "$HOME/.config" "$HOME/.local/state"/{python,psql,mysql,node,neomutt,ms
          "$HOME/.local/share/mail" "$HOME/.cache/neomutt"/{headers,bodies,tmp}
 
 # config/    -> ~/.config   (files linked one by one; app-written files stay out of git)
-# home/      -> ~           (only ~/.zshenv)
+# home/      -> ~           (~/.zshenv, and your own commands in ~/.local/bin)
 # karabiner/ -> ~/.config   (whole folder linked; Karabiner breaks if karabiner.json is a link)
 stow $SIMULATE -v --no-folding -d "$DOTFILES" -t "$HOME/.config" config
 stow $SIMULATE -v --no-folding -d "$DOTFILES" -t "$HOME" home

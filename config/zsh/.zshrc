@@ -65,7 +65,7 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # Created by `pipx` on 2024-06-07 16:44:06
-export PATH="$PATH:/Users/marufjony/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 export JAVA_HOME=$(brew --prefix openjdk)/libexec/openjdk.jdk/Contents/Home
 
 nerdfetch
